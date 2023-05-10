@@ -7,7 +7,10 @@ from kivy.uix.textinput import TextInput
 from kivy.uix.button import Button
 from kivy.uix.label import Label
 from kivy.uix.image import Image
+from kivy.uix.anchorlayout import AnchorLayout
 import os
+
+from kivy.uix.widget import Widget
 
 
 class LoginScreen(Screen):
@@ -30,15 +33,50 @@ class LoginScreen(Screen):
 class SecondScreen(Screen):
     def __init__(self, **kwargs):
         super(SecondScreen, self).__init__(**kwargs)
-        pic_path = os.path.join(os.path.dirname(__file__), 'pic')
-        file_list = os.listdir(pic_path)
+        self.pic_path = os.path.join(os.path.dirname(__file__), 'pic')
+        self.file_list = os.listdir(self.pic_path)
+        self.current_index = 0
 
-        box_layout = BoxLayout(orientation='horizontal', padding=50, spacing=15,size_hint=(1, 1.4))
+        layout = AnchorLayout(anchor_x='center', anchor_y='top')
 
-        for filename in file_list:
-            filepath = os.path.join(pic_path, filename)
-            box_layout.add_widget(Image(source=filepath))
-        self.add_widget(box_layout)
+        box_layout = BoxLayout(orientation='vertical', height=500, padding=100, spacing=15)
+        self.image = Image(source=self.get_current_image_path())
+        box_layout.add_widget(self.image)
+
+        layout.add_widget(box_layout)
+
+        button_layout = BoxLayout(orientation='horizontal', size_hint=(1, 1), spacing=10)
+        prev_button = Button(size_hint=(.1, 1),background_color=(0,0,0,0))
+        prev_button.bind(on_press=self.show_previous_image)
+        next_button = Button(size_hint=(.1, 1),background_color=(0,0,0,0))
+        next_button.bind(on_press=self.show_next_image)
+
+        button_layout.add_widget(prev_button)
+        button_layout.add_widget(Widget())  # Пустой виджет для растяжения
+        button_layout.add_widget(next_button)
+
+        layout.add_widget(button_layout)
+        self.add_widget(layout)
+
+    def get_current_image_path(self):
+        if self.file_list:
+            return os.path.join(self.pic_path, self.file_list[self.current_index])
+        else:
+            return ""
+
+    def show_previous_image(self, instance):
+        if self.file_list:
+            self.current_index -= 1
+            if self.current_index < 0:
+                self.current_index = len(self.file_list) - 1
+            self.image.source = self.get_current_image_path()
+
+    def show_next_image(self, instance):
+        if self.file_list:
+            self.current_index += 1
+            if self.current_index >= len(self.file_list):
+                self.current_index = 0
+            self.image.source = self.get_current_image_path()
 
     def on_swipe_left(self):
         App.get_running_app().root.current = 'third_screen'
