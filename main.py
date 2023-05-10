@@ -30,6 +30,9 @@ class LoginScreen(Screen):
         App.get_running_app().root.current = 'second_screen'
 
 
+from kivy.uix.screenmanager import ScreenManager, Screen
+from kivy.uix.button import Button
+
 class SecondScreen(Screen):
     def __init__(self, **kwargs):
         super(SecondScreen, self).__init__(**kwargs)
@@ -46,16 +49,21 @@ class SecondScreen(Screen):
         layout.add_widget(box_layout)
 
         button_layout = BoxLayout(orientation='horizontal', size_hint=(1, 1), spacing=10)
-        prev_button = Button(size_hint=(.1, 1),background_color=(0,0,0,0))
+        prev_button = Button(size_hint=(.1, 1), background_color=(0, 0, 0, 0))
         prev_button.bind(on_press=self.show_previous_image)
-        next_button = Button(size_hint=(.1, 1),background_color=(0,0,0,0))
+        next_button = Button(size_hint=(.1, 1), background_color=(0, 0, 0, 0))
         next_button.bind(on_press=self.show_next_image)
 
         button_layout.add_widget(prev_button)
-        button_layout.add_widget(Widget())  # Пустой виджет для растяжения
+        button_layout.add_widget(Widget())
         button_layout.add_widget(next_button)
 
         layout.add_widget(button_layout)
+
+        open_screen_button = Button(text='Открыть другой экран', size_hint=(1, .1), size=(200, 50))
+        open_screen_button.bind(on_press=self.open_other_screen)
+        layout.add_widget(open_screen_button)
+
         self.add_widget(layout)
 
     def get_current_image_path(self):
@@ -78,6 +86,10 @@ class SecondScreen(Screen):
                 self.current_index = 0
             self.image.source = self.get_current_image_path()
 
+    def open_other_screen(self,instance):
+        app = App.get_running_app()
+        app.root.current = 'other_screen'
+
     def on_swipe_left(self):
         App.get_running_app().root.current = 'third_screen'
 
@@ -86,10 +98,16 @@ class SecondScreen(Screen):
 
 
 
+
 class ThirdScreen(Screen):
     def __init__(self, **kwargs):
         super(ThirdScreen, self).__init__(**kwargs)
         self.add_widget(Label(text='Это второй экран'))
+
+class PopUpP(Screen):
+    def __init__(self, **kwargs):
+        super(PopUpP, self).__init__(**kwargs)
+        self.add_widget(Label(text='Это popup'))
 
 class MyScreenManager(ScreenManager):
     def __init__(self, **kwargs):
@@ -101,6 +119,12 @@ class MyScreenManager(ScreenManager):
             if touch.dx > 50:
                 self.transition.direction = 'right'
                 self.current = self.next()
+
+        elif self.current == 'other_screen':
+            if touch.dy > 50:
+                self.transition.direction = 'down'
+                self.current = 'second_screen'
+
         elif self.current == 'third_screen':
             if touch.dx < -50:
                 self.transition.direction = 'left'
@@ -113,6 +137,7 @@ class MyApp(App):
         screen_manager.add_widget(LoginScreen(name='login_screen1'))
         screen_manager.add_widget(SecondScreen(name='second_screen1'))
         screen_manager.add_widget(ThirdScreen(name='third_screen1'))
+        screen_manager.add_widget(PopUpP(name='other_screen1'))
         screen_manager.swipe_distance = 50
         return screen_manager
 
