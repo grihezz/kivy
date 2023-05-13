@@ -1,6 +1,7 @@
 import os
 from kivy.app import App
 from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.image import AsyncImage
 from kivy.uix.screenmanager import Screen, ScreenManager, SlideTransition
 from kivy.uix.textinput import TextInput
@@ -9,10 +10,27 @@ from kivy.uix.label import Label
 from kivy.uix.image import Image
 from kivy.uix.anchorlayout import AnchorLayout
 import os
+from kivy.lang import Builder
 
+from kivymd.toast import toast
+from kivymd.uix.bottomsheet import MDGridBottomSheet
+from kivymd.app import MDApp
 from kivy.uix.widget import Widget
+from kivymd.app import MDApp
 
+KV = '''
+Screen:
 
+    MDToolbar:
+        title: 'Example BottomSheet'
+        pos_hint: {"top": 1}
+        elevation: 10
+
+    MDRaisedButton:
+        text: "Open grid bottom sheet"
+        on_release: app.show_example_grid_bottom_sheet()
+        pos_hint: {"center_x": .5, "center_y": .5}
+'''
 class LoginScreen(Screen):
     def __init__(self, **kwargs):
         super(LoginScreen, self).__init__(**kwargs)
@@ -29,9 +47,11 @@ class LoginScreen(Screen):
     def go_to_next_screen(self, instance):
         App.get_running_app().root.current = 'second_screen'
 
-
-from kivy.uix.screenmanager import ScreenManager, Screen
+from kivymd.uix.dialog import MDDialog
 from kivy.uix.button import Button
+from kivy.uix.screenmanager import Screen
+from kivy.lang import Builder
+
 
 class SecondScreen(Screen):
     def __init__(self, **kwargs):
@@ -42,13 +62,15 @@ class SecondScreen(Screen):
 
         layout = AnchorLayout(anchor_x='center', anchor_y='top')
 
-        box_layout = BoxLayout(orientation='vertical', height=500, padding=100, spacing=15)
+        box_layout = BoxLayout(orientation='vertical', height=500, padding=100,
+                               spacing=15)
         self.image = Image(source=self.get_current_image_path())
         box_layout.add_widget(self.image)
 
         layout.add_widget(box_layout)
 
-        button_layout = BoxLayout(orientation='horizontal', size_hint=(1, 1), spacing=10)
+        button_layout = BoxLayout(orientation='horizontal', size_hint=(1, 1),
+                                  spacing=10)
         prev_button = Button(size_hint=(.1, 1), background_color=(0, 0, 0, 0))
         prev_button.bind(on_press=self.show_previous_image)
         next_button = Button(size_hint=(.1, 1), background_color=(0, 0, 0, 0))
@@ -60,9 +82,16 @@ class SecondScreen(Screen):
 
         layout.add_widget(button_layout)
 
-        open_screen_button = Button(text='Открыть другой экран', size_hint=(1, .1), size=(200, 50))
-        open_screen_button.bind(on_press=self.open_other_screen)
-        layout.add_widget(open_screen_button)
+        float_layout = FloatLayout(size_hint=(.8, 1),
+                                   pos_hint={'x': 0, 'y': 0})
+        circular_button = Button(size_hint=(None, None),
+                                 size=(150, 150),
+                                 pos_hint={'center_x': .5, 'y': 0},
+                                 background_normal='free-icon-power-button-1783327.png',
+                                 background_down='free-icon-power-button-1783327.png')
+        float_layout.add_widget(circular_button)
+
+        layout.add_widget(float_layout)
 
         self.add_widget(layout)
 
@@ -86,15 +115,7 @@ class SecondScreen(Screen):
                 self.current_index = 0
             self.image.source = self.get_current_image_path()
 
-    def open_other_screen(self,instance):
-        app = App.get_running_app()
-        app.root.current = 'other_screen'
 
-    def on_swipe_left(self):
-        App.get_running_app().root.current = 'third_screen'
-
-    def go_back(self, instance):
-        App.get_running_app().root.current = 'login_screen'
 
 
 
@@ -130,6 +151,8 @@ class MyScreenManager(ScreenManager):
             if touch.dx < -50:
                 self.transition.direction = 'left'
                 self.current = self.previous()
+    def show_grid_bottom_sheet(self):
+        pass
 
 
 class MyApp(App):
@@ -145,8 +168,3 @@ class MyApp(App):
 
 if __name__ == '__main__':
     MyApp().run()
-
-
-'''
-committ
-'''
